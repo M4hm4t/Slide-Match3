@@ -58,15 +58,15 @@ public class Board : MonoBehaviour {
 	}
     
 
-	public void GenerateBlankSpaces(){
-		for (int i = 0; i < boardLayout.Length; i ++)
-		{
-			if(boardLayout[i].tileKind == TileKind.Blank)
-			{
-				blankSpaces[boardLayout[i].x, boardLayout[i].y] = true;
-			}
-		}
-	}
+	//public void GenerateBlankSpaces(){
+	//	for (int i = 0; i < boardLayout.Length; i ++)
+	//	{
+	//		if(boardLayout[i].tileKind == TileKind.Blank)
+	//		{
+	//			blankSpaces[boardLayout[i].x, boardLayout[i].y] = true;
+	//		}
+	//	}
+	//}
 
     public void GenerateBreakableTiles()
 	{
@@ -85,7 +85,7 @@ public class Board : MonoBehaviour {
 	}
 
     private void SetUp(){
-		GenerateBlankSpaces();
+		//GenerateBlankSpaces();
 		GenerateBreakableTiles();
         for (int i = 0; i < width; i ++){
 			for (int j = 0; j < height; j++)
