@@ -13,7 +13,7 @@ public class ScoreManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		board = FindObjectOfType<Board>();
-		//UpdateBar();
+		UpdateBar();
 	}
 	
 	// Update is called once per frame
@@ -24,19 +24,19 @@ public class ScoreManager : MonoBehaviour {
     public void IncreaseScore(int amountToIncrease)
 	{
 		score += amountToIncrease;
-		//UpdateBar();
+		UpdateBar();
 	}
 
- //   private void UpdateBar()
-	//{
-	//	if (board != null && scoreBar != null)
- //       {
+    private void UpdateBar()
+	{
+		if (board != null && scoreBar != null)
+        {
 			
- //           int length = board.scoreGoals.Length;
+            int length = board.scoreGoals.Length;
           
-	//		scoreBar.fillAmount = (float)score / (float)board.scoreGoals[length - 1];
+			scoreBar.fillAmount = (float)score / (float)board.scoreGoals[length - 1];
 
 
- //       }
-	//}
+        }
+	}
 }

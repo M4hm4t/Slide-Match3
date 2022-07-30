@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,6 +36,7 @@ public class Dot : MonoBehaviour
     public GameObject rowArrow;
     public GameObject columnArrow;
     public GameObject colorBomb;
+    public bool isDraging = false;
 
 
     // Use this for initialization
@@ -82,6 +84,7 @@ public class Dot : MonoBehaviour
             mySprite.color = new Color(currentColor.r, currentColor.g, currentColor.b, .5f);
         }
         */
+        if (isDraging) return;
         targetX = column;
         targetY = row;
         if (Mathf.Abs(targetX - transform.position.x) > .1)
@@ -162,202 +165,222 @@ public class Dot : MonoBehaviour
 
     }
 
-    private void OnMouseDown()
-    {
-        //Destroy the hint
-        if (hintManager != null)
-        {
-            hintManager.DestroyHint();
-        }
-        if (board.currentState == GameState.move)
-        {
-            firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        }
-    }
 
-    private void OnMouseUp()
-    {
-        if (board.currentState == GameState.move)
-        {
-            finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            CalculateAngle();
-        }
-    }
+    //private void OnMouseDown()
+    //{
+    //    //Destroy the hint
+    //    //if (hintManager != null)
+    //    //{
+    //    //    hintManager.DestroyHint();
+    //    //}
+    //    //if (board.currentState == GameState.move)
+    //    //{
+    //    //    firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    //    //}
+    //}
 
-    void CalculateAngle()
-    {
-        if (Mathf.Abs(finalTouchPosition.y - firstTouchPosition.y) > swipeResist || Mathf.Abs(finalTouchPosition.x - firstTouchPosition.x) > swipeResist)
-        {
-            board.currentState = GameState.wait;
-            swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
-            MovePieces();
-
-            board.currentDot = this;
-
-        }
-        else
-        {
-            board.currentState = GameState.move;
-
-        }
-    }
-
-    void MovePiecesActual(Vector2 direction)
-    {
-        MoveRowOrColumn(direction);
-        return;
-        otherDot = board.allDots[column + (int)direction.x, row + (int)direction.y];
-        previousRow = row;
-        previousColumn = column;
-        if (otherDot != null)
-        {
-            otherDot.GetComponent<Dot>().column += -1 * (int)direction.x;
-            otherDot.GetComponent<Dot>().row += -1 * (int)direction.y;
-            column += (int)direction.x;
-            row += (int)direction.y;
-            StartCoroutine(CheckMoveCo());
-        }
-        else
-        {
-            board.currentState = GameState.move;
-        }
-    }
-    void MoveRowOrColumn(Vector2 direction)
-    {
-        if (direction == Vector2.right || direction == Vector2.left) // move horizontal
-        {
-            for (int i = 0; i < board.width; i++)
-            {
-                var dot = board.allDots[i, row];
-                Move(dot, direction);
-            }
-        }else // move veritacal
-        {
-            for (int i = 0; i < board.height; i++)
-            {
-                var dot = board.allDots[column, i];
-                Move(dot, direction);
-            }
-        }
-        board.currentState = GameState.move;
-
-
-    }
-
-    void Move(GameObject dot, Vector2 direction)
-    {
-        var moveColumn = (dot.GetComponent<Dot>().column + (int)direction.x) % board.width;
-        var moveRow = (dot.GetComponent<Dot>().row + (int)direction.y) % board.height;
-
-        if (moveRow < 0)
-        {
-            moveRow += board.height;
-        }
-        if (moveColumn < 0)
-        {
-            moveColumn += board.width;
-        }
-        dot.GetComponent<Dot>().column = moveColumn;
-        dot.GetComponent<Dot>().row = moveRow;
-    }
-
-
-    void MovePieces()
-    {
-        if (swipeAngle > -45 && swipeAngle <= 45 && column < board.width - 1)
-        {
-            //Right Swipe
-            /*
-            otherDot = board.allDots[column + 1, row];
-            previousRow = row;
-            previousColumn = column;
-            otherDot.GetComponent<Dot>().column -=1;
-            column += 1;
-            StartCoroutine(CheckMoveCo());
-            */
-            MovePiecesActual(Vector2.right);
-        }
-        else if (swipeAngle > 45 && swipeAngle <= 135 && row < board.height - 1)
-        {
-            //Up Swipe
-            /*
-            otherDot = board.allDots[column, row + 1];
-            previousRow = row;
-            previousColumn = column;
-            otherDot.GetComponent<Dot>().row -=1;
-            row += 1;
-            StartCoroutine(CheckMoveCo());
-            */
-            MovePiecesActual(Vector2.up);
-        }
-        else if ((swipeAngle > 135 || swipeAngle <= -135) && column > 0)
-        {
-            //Left Swipe
-            /*
-            otherDot = board.allDots[column - 1, row];
-            previousRow = row;
-            previousColumn = column;
-            otherDot.GetComponent<Dot>().column +=1;
-            column -= 1;
-            StartCoroutine(CheckMoveCo());
-            */
-            MovePiecesActual(Vector2.left);
-        }
-        else if (swipeAngle < -45 && swipeAngle >= -135 && row > 0)
-        {
-            //Down Swipe
-            /*
-            otherDot = board.allDots[column, row - 1];
-            previousRow = row;
-            previousColumn = column;
-            otherDot.GetComponent<Dot>().row +=1;
-            row -= 1;
-            StartCoroutine(CheckMoveCo());
-            */
-            MovePiecesActual(Vector2.down);
-        }
-        else
-        {
-
-            board.currentState = GameState.move;
-        }
+    //private void OnMouseUp()
+    //{
+    //    //board.RelocationAll();
+    //    //board.DestroyMatches();
+    //}
 
 
 
-    }
+    //private void OnMouseDrag()
+    //{
+    //    //if (board.currentState == GameState.move && !isDraging)
+    //    //{
+    //    //    isDraging = true;
+    //    //    finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    //    //    //CalculateAngle();
+    //    //    Move2();
+    //    //}
+    //}
 
-    void FindMatches()
-    {
-        if (column > 0 && column < board.width - 1)
-        {
-            GameObject leftDot1 = board.allDots[column - 1, row];
-            GameObject rightDot1 = board.allDots[column + 1, row];
-            if (leftDot1 != null && rightDot1 != null)
-            {
-                if (leftDot1.tag == this.gameObject.tag && rightDot1.tag == this.gameObject.tag)
-                {
-                    leftDot1.GetComponent<Dot>().isMatched = true;
-                    rightDot1.GetComponent<Dot>().isMatched = true;
-                    isMatched = true;
-                }
-            }
-        }
-        if (row > 0 && row < board.height - 1)
-        {
-            GameObject upDot1 = board.allDots[column, row + 1];
-            GameObject downDot1 = board.allDots[column, row - 1];
-            if (upDot1 != null && downDot1 != null)
-            {
-                if (upDot1.tag == this.gameObject.tag && downDot1.tag == this.gameObject.tag)
-                {
-                    upDot1.GetComponent<Dot>().isMatched = true;
-                    downDot1.GetComponent<Dot>().isMatched = true;
-                    isMatched = true;
-                }
-            }
-        }
+    //void CalculateAngle()
+    //{
+    //    if (Mathf.Abs(finalTouchPosition.y - firstTouchPosition.y) > swipeResist || Mathf.Abs(finalTouchPosition.x - firstTouchPosition.x) > swipeResist)
+    //    {
+    //        board.currentState = GameState.wait;
+    //        swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
+    //        MovePieces();
 
-    }
+    //        board.currentDot = this;
+
+    //    }
+    //    else
+    //    {
+    //        board.currentState = GameState.move;
+
+    //    }
+    //}
+    
+   
+
+    //void MovePiecesActual(Vector2 direction)
+    //{
+    //    var distance = Vector2.Distance(firstTouchPosition, finalTouchPosition);
+    //    direction.x = direction.x * distance;
+    //    direction.y = direction.y * distance;
+    //    MoveRowOrColumn(direction);
+    //    return;
+    //    otherDot = board.allDots[column + (int)direction.x, row + (int)direction.y];
+    //    previousRow = row;
+    //    previousColumn = column;
+    //    if (otherDot != null)
+    //    {
+    //        otherDot.GetComponent<Dot>().column += -1 * (int)direction.x;
+    //        otherDot.GetComponent<Dot>().row += -1 * (int)direction.y;
+    //        column += (int)direction.x;
+    //        row += (int)direction.y;
+    //        StartCoroutine(CheckMoveCo());
+    //    }
+    //    else
+    //    {
+    //        board.currentState = GameState.move;
+    //    }
+    //}
+    //void MoveRowOrColumn(Vector2 direction)
+    //{
+    //    if (direction == Vector2.right || direction == Vector2.left) // move horizontal
+    //    {
+    //        for (int i = 0; i < board.width; i++)
+    //        {
+    //            var dot = board.allDots[i, row];
+
+    //            Move(dot, direction);
+    //        }
+
+    //    }
+    //    else // move veritacal
+    //    {
+    //        for (int i = 0; i < board.height; i++)
+    //        {
+    //            var dot = board.allDots[column, i];
+    //            Move(dot, direction);
+    //        }
+
+    //    }
+
+    //    board.currentState = GameState.move;
+
+    //}
+
+    //void Move(GameObject dot, Vector2 direction)
+    //{
+    //    var moveColumn = (dot.GetComponent<Dot>().column + (int)direction.x) % board.width;
+    //    var moveRow = (dot.GetComponent<Dot>().row + (int)direction.y) % board.height;
+
+    //    if (moveRow < 0)
+    //    {
+    //        moveRow += board.height;
+    //    }
+    //    if (moveColumn < 0)
+    //    {
+    //        moveColumn += board.width;
+    //    }
+    //    dot.GetComponent<Dot>().column = moveColumn;
+    //    dot.GetComponent<Dot>().row = moveRow;
+    //}
+
+
+    //void MovePieces()
+    //{
+    //    if (swipeAngle > -45 && swipeAngle <= 45 && column < board.width - 1)
+    //    {
+    //        //Right Swipe
+    //        /*
+    //        otherDot = board.allDots[column + 1, row];
+    //        previousRow = row;
+    //        previousColumn = column;
+    //        otherDot.GetComponent<Dot>().column -=1;
+    //        column += 1;
+    //        StartCoroutine(CheckMoveCo());
+    //        */
+    //        MovePiecesActual(Vector2.right);
+    //    }
+    //    else if (swipeAngle > 45 && swipeAngle <= 135 && row < board.height - 1)
+    //    {
+    //        //Up Swipe
+    //        /*
+    //        otherDot = board.allDots[column, row + 1];
+    //        previousRow = row;
+    //        previousColumn = column;
+    //        otherDot.GetComponent<Dot>().row -=1;
+    //        row += 1;
+    //        StartCoroutine(CheckMoveCo());
+    //        */
+    //        MovePiecesActual(Vector2.up);
+    //    }
+    //    else if ((swipeAngle > 135 || swipeAngle <= -135) && column > 0)
+    //    {
+    //        //Left Swipe
+    //        /*
+    //        otherDot = board.allDots[column - 1, row];
+    //        previousRow = row;
+    //        previousColumn = column;
+    //        otherDot.GetComponent<Dot>().column +=1;
+    //        column -= 1;
+    //        StartCoroutine(CheckMoveCo());
+    //        */
+    //        MovePiecesActual(Vector2.left);
+    //    }
+    //    else if (swipeAngle < -45 && swipeAngle >= -135 && row > 0)
+    //    {
+    //        //Down Swipe
+    //        /*
+    //        otherDot = board.allDots[column, row - 1];
+    //        previousRow = row;
+    //        previousColumn = column;
+    //        otherDot.GetComponent<Dot>().row +=1;
+    //        row -= 1;
+    //        StartCoroutine(CheckMoveCo());
+    //        */
+    //        MovePiecesActual(Vector2.down);
+    //    }
+    //    else
+    //    {
+
+    //        board.currentState = GameState.move;
+    //    }
+
+
+
+    //}
+
+    //void FindMatches()
+    //{
+    //    if (column > 0 && column < board.width - 1)
+    //    {
+    //        GameObject leftDot1 = board.allDots[column - 1, row];
+    //        GameObject rightDot1 = board.allDots[column + 1, row];
+    //        if (leftDot1 != null && rightDot1 != null)
+    //        {
+    //            if (leftDot1.tag == this.gameObject.tag && rightDot1.tag == this.gameObject.tag)
+    //            {
+    //                leftDot1.GetComponent<Dot>().isMatched = true;
+    //                rightDot1.GetComponent<Dot>().isMatched = true;
+    //                isMatched = true;
+    //            }
+    //        }
+    //    }
+    //    if (row > 0 && row < board.height - 1)
+    //    {
+    //        GameObject upDot1 = board.allDots[column, row + 1];
+    //        GameObject downDot1 = board.allDots[column, row - 1];
+    //        if (upDot1 != null && downDot1 != null)
+    //        {
+    //            if (upDot1.tag == this.gameObject.tag && downDot1.tag == this.gameObject.tag)
+    //            {
+    //                upDot1.GetComponent<Dot>().isMatched = true;
+    //                downDot1.GetComponent<Dot>().isMatched = true;
+    //                isMatched = true;
+    //            }
+    //        }
+    //    }
+
+    //}
 
     public void MakeRowBomb()
     {
